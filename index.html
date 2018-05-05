@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>GAME</title>
+<style type="text/css">
+	body,div{
+		margin:0;
+		padding:0;
+		border:0;
+	}
+	#main{
+		margin:auto;
+		width:100%;
+		height:100%;
+		position:relative;
+	}
+</style>
+</head>
+
+<body>
+	<div id="main">
+		<canvas width="360" height="500" id="myCanvas">你的浏览器不支持html5的canvas</canvas>
+    </div>
+</body>
+<script>
+	function $(str)
+	{
+		return document.getElementById(str);
+	}
+	
+	var myCanvas = $("myCanvas");
+	var myImg = new Image();
+	myImg.src = 'resource/1.png';
+	var AActive = new Image();
+	AActive.src = 'resource/A.png';
+	var BActive = new Image();
+	BActive.src = 'resource/B.png';
+	var CActive = new Image();
+	CActive.src = 'resource/C.png';
+	var DActive = new Image();
+	DActive.src = 'resource/D.png';
+	var EActive = new Image();
+	EActive.src = 'resource/E.png';
+	var FActive = new Image();
+	FActive.src = 'resource/F.png';
+	var leftActive = new Image();
+	leftActive.src = 'resource/left.png';
+	var rightActive = new Image();
+	rightActive.src = 'resource/right.png';
+	var upActive = new Image();
+	upActive.src = 'resource/up.png';
+	var downActive = new Image();
+	downActive.src = 'resource/down.png';
+	
+	
+	var ctx = myCanvas.getContext('2d');
+	
+	myImg.onload = function() {
+		ctx.drawImage(myImg, 0, 0, 360, 500);
+	}
+	
+	//websocket创建
+	var websocketBusyFlag = 0;
+	var WS = null;
+	if(window.WebSocket)
+	{
+		WS = new WebSocket('ws://192.168.1.104:8081/websocket');          //注意：更改ip地址和端口号，要和python代码一致
+	}
+	else
+	{
+		alert("你的浏览器不支持websocket");
+	}
+	WS.onopen = function() {
+		WS.send('欢迎来到拳皇手柄');
+	}
+	WS.onmessage = function(e) {
+		var message = e.data;
+		if(message == 'reset') websocketBusyFlag = 0;
+		else alert(message);
+	}	
+	
+	/**********************操作事件<开始>***************************/
+	/*每个键均为圆形判定*/
+	var leftX = 150, leftY = 60, leftR = 30;
+	var rightX = 150, rightY = 180, rightR = 30;
+	var upX = 210, upY = 120, upR = 30;
+	var downX = 90, downY = 120, downR = 30;
+	var softshootX=150, softshootY=250, softshootR=30;
+	var heavyshootX=260, heavyshootY=250, heavyshootR=30;
+	var softfootX=150, softfootY=340, softfootR=30;
+	var heavyfootX=260, heavyfootY=340, heavyfootR=30;
+	var speoneX=260, speoneY=430, speoneR=30;
+	var spetwoX=150, spetwoY=430, spetwoR=30;
+	myCanvas.ontouchstart = function(e) {
+		var x = e.touches[0].clientX;
+		var y = e.touches[0].clientY;
+		//左走
+		if(Math.sqrt((x - leftX)*(x - leftX) + (y - leftY)*(y - leftY)) <= leftR)
+		{
+			WS.send('leftward_start');
+			ctx.save();
+			ctx.translate(leftX-30,leftY-30);
+		    ctx.rotate(0);
+			ctx.drawImage(leftActive, 0, 0);
+		    ctx.restore();
+		}
+		//右走
+		if(Math.sqrt((x - rightX)*(x - rightX) + (y - rightY)*(y - rightY)) <= rightR)
+		{
+			WS.send('rightward_start');
+			ctx.save();
+			ctx.translate(rightX-30,rightY-30);
+		    ctx.rotate(0);
+			ctx.drawImage(rightActive, 0, 0);
+		    ctx.restore();
+		}
+		//上跳
+		if(Math.sqrt((x - upX)*(x - upX) + (y - upY)*(y - upY)) <= upR)
+		{
+			WS.send('upward_start');
+			ctx.save();
+			ctx.translate(upX-30,upY-30);
+		    ctx.rotate(0);
+			ctx.drawImage(upActive, 0, 0);
+		    ctx.restore();
+		}
+		//下蹲
+		if(Math.sqrt((x - downX)*(x - downX) + (y - downY)*(y - downY)) <= downR)
+		{
+			WS.send('downward_start');
+			ctx.save();
+			ctx.translate(downX-30,downY-30);
+		    ctx.rotate(0);
+			ctx.drawImage(downActive, 0, 0);
+		    ctx.restore();
+		}
+		//轻拳
+		if(Math.sqrt((x - softshootX)*(x - softshootX) + (y - softshootY)*(y - softshootY)) <= softshootR)
+		{
+			WS.send('softshoot');
+			ctx.save();
+			ctx.translate(softshootX-30,softshootY-30);
+		    ctx.rotate(0);
+			ctx.drawImage(DActive, 0, 0);
+		    ctx.restore();
+		}
+		//重拳
+		if(Math.sqrt((x - heavyshootX)*(x - heavyshootX) + (y - heavyshootY)*(y - heavyshootY)) <= heavyshootR)
+		{
+			WS.send('heavyshoot');
+			ctx.save();
+			ctx.translate(heavyshootX-30,heavyshootY-30);
+		    ctx.rotate(0);
+			ctx.drawImage(AActive, 0, 0);
+		    ctx.restore();
+		}
+		//轻脚
+		if(Math.sqrt((x - softfootX)*(x - softfootX) + (y - softfootY)*(y - softfootY)) <= softfootR)
+		{
+			WS.send('softfoot');
+			ctx.save();
+			ctx.translate(softfootX-30,softfootY-30);
+		    ctx.rotate(0);
+			ctx.drawImage(EActive, 0, 0);
+		    ctx.restore();
+		}
+		//重脚
+		if(Math.sqrt((x - heavyfootX)*(x - heavyfootX) + (y - heavyfootY)*(y - heavyfootY)) <= heavyfootR)
+		{
+			WS.send('heavyfoot');
+			ctx.save();
+			ctx.translate(heavyfootX-30,heavyfootY-30);
+		    ctx.rotate(0);
+			ctx.drawImage(BActive, 0, 0);
+		    ctx.restore();
+		}
+		event.preventDefault();
+		//特殊键位1
+		if(Math.sqrt((x - speoneX)*(x - speoneX) + (y - speoneY)*(y - speoneY)) <= speoneR)
+		{
+			WS.send('speone');
+			ctx.save();
+			ctx.translate(speoneX-30,speoneY-30);
+		    ctx.rotate(0);
+			ctx.drawImage(CActive, 0, 0);
+		    ctx.restore();
+		}
+		//特殊键位2
+		if(Math.sqrt((x - spetwoX)*(x - spetwoX) + (y - spetwoY)*(y - spetwoY)) <= spetwoR)
+		{
+			WS.send('spetwo');
+			ctx.save();
+			ctx.translate(spetwoX-30,spetwoY-30);
+		    ctx.rotate(0);
+			ctx.drawImage(FActive, 0, 0);
+		    ctx.restore();
+		}
+		event.preventDefault();
+	}
+	myCanvas.ontouchmove = function(e){
+		event.preventDefault();
+	}
+	myCanvas.ontouchend = function(e) {
+	    x = e.changedTouches[0].screenX;
+		y = e.changedTouches[0].screenY;
+		ctx.save();
+		ctx.translate(0,0);
+		ctx.rotate(0);
+		ctx.drawImage(myImg, 0, 0, 360, 500);
+		ctx.restore();
+	    //左走
+		if(Math.sqrt((x - leftX)*(x - leftX) + (y - leftY)*(y - leftY)) <= leftR)
+		{
+			WS.send('leftward_end');
+		}
+		//右走
+		if(Math.sqrt((x - rightX)*(x - rightX) + (y - rightY)*(y - rightY)) <= rightR)
+		{
+			WS.send('rightward_end');
+		}
+		//上跳
+		if(Math.sqrt((x - upX)*(x - upX) + (y - upY)*(y - upY)) <= upR)
+		{
+			WS.send('upward_end');
+		}
+		//下蹲
+		if(Math.sqrt((x - downX)*(x - downX) + (y - downY)*(y - downY)) <= downR)
+		{
+			WS.send('downward_end');
+		}
+		event.preventDefault();	
+	}
+	myCanvas.ontouchcancel = function(e) {
+	    x = e.changedTouches[0].screenX;
+		y = e.changedTouches[0].screenY;
+		ctx.save();
+		ctx.translate(0,0);
+		ctx.rotate(0);
+		ctx.drawImage(myImg, 0, 0, 360, 500);
+		ctx.restore();
+		//左走
+		if(Math.sqrt((x - leftX)*(x - leftX) + (y - leftY)*(y - leftY)) <= leftR)
+		{
+			WS.send('leftward_end');
+		}
+		//右走
+		if(Math.sqrt((x - rightX)*(x - rightX) + (y - rightY)*(y - rightY)) <= rightR)
+		{
+			WS.send('rightward_end');
+		}
+		//上跳
+		if(Math.sqrt((x - upX)*(x - upX) + (y - upY)*(y - upY)) <= upR)
+		{
+			WS.send('upward_end');
+		}
+		//下蹲
+		if(Math.sqrt((x - downX)*(x - downX) + (y - downY)*(y - downY)) <= downR)
+		{
+			WS.send('downward_end');
+		}
+		event.preventDefault();
+	}
+	
+
+
+	/********************操作事件<结束>***************************/
+</script>
+</html>
